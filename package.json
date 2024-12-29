@@ -2,19 +2,21 @@
   "name": "crescendo",
   "version": "1.0.0",
   "main": "index.js",
-    "type": "module",
-    "scripts": {
-      "dev": "vinxi dev",
-      "build": "vinxi build",
-      "start": "vinxi start"
-    },
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.1.0",
     "@tanstack/react-router": "^1.92.6",
     "@tanstack/start": "^1.92.6",
+    "prisma": "^6.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vinxi": "^0.5.1"
