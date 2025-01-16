@@ -9,7 +9,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@crescendo/shared-types": path.resolve(__dirname, "../../packages/shared-types/src"),
       "@crescendo/validation": path.resolve(__dirname, "../../packages/validation/src"),
     },
   },

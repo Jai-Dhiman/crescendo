@@ -10,10 +10,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@crescendo/shared-types": ["../../packages/shared-types/src"],
       "@crescendo/validation": ["../../packages/validation/src"]
     }
   },
   "include": ["src"],
-  "references": [{ "path": "../../packages/shared-types" }, { "path": "../../packages/validation" }]
+  "references": [{ "path": "../../packages/validation" }]
 }

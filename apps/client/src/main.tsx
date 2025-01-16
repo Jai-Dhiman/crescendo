@@ -6,7 +6,6 @@ import {
   createRouter,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { Spinner } from '@/components/Spinner'
 import { routeTree } from '@/routeTree.gen'
 import '@unocss/reset/tailwind.css'
@@ -41,9 +40,7 @@ if (!rootElement.innerHTML) {
   root.render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
           <RouterProvider router={router} />
-        </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>,
   )

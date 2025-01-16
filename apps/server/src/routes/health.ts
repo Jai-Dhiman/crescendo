@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import type { Dependencies } from "../types/deps";
 
 export const createHealthCheck = (deps: Dependencies) => {
   return async (c: Context) => {
