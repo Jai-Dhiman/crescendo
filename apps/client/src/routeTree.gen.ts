@@ -13,9 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as PieceLibraryImport } from './routes/pieceLibrary'
 import { Route as PieceImport } from './routes/piece'
-import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
-import { Route as AuthCallbackImport } from './routes/auth.callback'
 
 // Create/Update Routes
 
@@ -31,20 +29,9 @@ const PieceRoute = PieceImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AppRoute = AppImport.update({
-  id: '/_app',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AuthCallbackRoute = AuthCallbackImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -57,13 +44,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AppImport
       parentRoute: typeof rootRoute
     }
     '/piece': {
@@ -80,13 +60,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PieceLibraryImport
       parentRoute: typeof rootRoute
     }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -94,52 +67,42 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '': typeof AppRoute
   '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
-  '/auth/callback': typeof AuthCallbackRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '': typeof AppRoute
   '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
-  '/auth/callback': typeof AuthCallbackRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/_app': typeof AppRoute
   '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
-  '/auth/callback': typeof AuthCallbackRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/piece' | '/pieceLibrary' | '/auth/callback'
+  fullPaths: '/' | '/piece' | '/pieceLibrary'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/piece' | '/pieceLibrary' | '/auth/callback'
-  id: '__root__' | '/' | '/_app' | '/piece' | '/pieceLibrary' | '/auth/callback'
+  to: '/' | '/piece' | '/pieceLibrary'
+  id: '__root__' | '/' | '/piece' | '/pieceLibrary'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
   PieceRoute: typeof PieceRoute
   PieceLibraryRoute: typeof PieceLibraryRoute
-  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
   PieceRoute: PieceRoute,
   PieceLibraryRoute: PieceLibraryRoute,
-  AuthCallbackRoute: AuthCallbackRoute,
 }
 
 export const routeTree = rootRoute
@@ -153,26 +116,18 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_app",
         "/piece",
-        "/pieceLibrary",
-        "/auth/callback"
+        "/pieceLibrary"
       ]
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/_app": {
-      "filePath": "_app.tsx"
     },
     "/piece": {
       "filePath": "piece.tsx"
     },
     "/pieceLibrary": {
       "filePath": "pieceLibrary.tsx"
-    },
-    "/auth/callback": {
-      "filePath": "auth.callback.tsx"
     }
   }
 }

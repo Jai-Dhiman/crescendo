@@ -1,27 +1,23 @@
 import { Link } from '@tanstack/react-router'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { LogoutButton } from './LogoutButton'
-import { LoginButton } from './LoginButton'
 
 export function Navigation() {
-  const { isAuthenticated, user } = useAuth()
   
   return (
     <nav className="fixed top-0 w-full h-16 glass border-b border-gray-200 dark:border-gray-700 z-50">
       <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <div className={`flex items-center ${isAuthenticated ? 'gap-6' : 'gap-2'}`}>
+          <div className={`flex items-center 'gap-6`}>
             <Link
               to="/"
               className="h-12 flex items-center"
             >
               <img
-                src="/Crescendo1.png"
+                src="/CrescendoIcon.png"
                 alt="Home"
                 className="h-full w-auto"
               />
             </Link>
-            {isAuthenticated && (
+
               <>
                 <Link
                   to="/pieceLibrary"
@@ -42,19 +38,15 @@ export function Navigation() {
                   Individual Piece
                 </Link>
               </>
-            )}
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {isAuthenticated && (
             <div className="relative">
               <input
                 className="input-modern w-64"
                 placeholder="Search pieces..."
               />
             </div>
-          )}
-          {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <svg
@@ -71,14 +63,9 @@ export function Navigation() {
                   />
                 </svg>
                 <span className="font-recia-regular">
-                  {user?.firstName || user?.email}
                 </span>
               </div>
-              <LogoutButton />
             </div>
-          ) : (
-            <LoginButton />
-          )}
         </div>
       </div>
     </nav>
