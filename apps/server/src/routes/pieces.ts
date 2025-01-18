@@ -1,108 +1,111 @@
-// import { Hono } from "hono";
-// import { db } from "../db";
-// import { pieces as piecesTable } from "../db/schema";
-// import { zValidator } from "@hono/zod-validator";
-// import { z } from "zod";
-// import { eq } from "drizzle-orm";
-// import { uploadToS3, deleteFromS3 } from "../lib/s3";
-// import type { UserSession } from "../types/auth";
-// import { createId } from "@paralleldrive/cuid2";
+import { Hono } from "hono";
+import { uploadToR2 } from "@/lib/r2";
+import { pieces as pieceTable } from "@/db/schema";
+import { createDb } from "@/db";
+import { eq } from "drizzle-orm";
 
-// type Variables = {
-//   session: UserSession;
-// };
+export interface Env {
+  BUCKET: R2Bucket;
+  R2_PUBLIC_URL: string;
+  DB: D1Database;
+}
 
-// const piecesRouter = new Hono<{ Variables: Variables }>();
+const testRouter = new Hono<{ Bindings: Env }>();
 
-// const createPieceSchema = z.object({
-//   title: z.string().min(1),
-// });
+testRouter.get("/api/pieces", async (c) => {
+  try {
+    const db = createDb(c.env.DB);
+    const pieces = await db.select().from(pieceTable).where(eq(pieceTable.userId, "Test User")).all();
 
-// piecesRouter.get("/", async (c) => {
-//   const session = c.get("session") as UserSession;
-//   const userPieces = await db.query.pieces.findMany({
-//     where: eq(piecesTable.userId, session.userId),
-//     orderBy: (pieces, { desc }) => [desc(pieces.createdAt)],
-//   });
+    return c.json(pieces);
+  } catch (error) {
+    console.error("Error fetching pieces:", error);
+    return c.json({ error: "Failed to fetch pieces" }, 500);
+  }
+});
 
-//   return c.json({ pieces: userPieces });
-// });
+testRouter.get("/api/pieces/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = createDb(c.env.DB);
+    const piece = await db.select().from(pieceTable).where(eq(pieceTable.id, id)).get();
 
-// piecesRouter.get("/:id", async (c) => {
-//   const session = c.get("session") as UserSession;
-//   const pieceId = c.req.param("id");
+    if (!piece) {
+      return c.json({ error: "Piece not found" }, 404);
+    }
 
-//   const piece = await db.query.pieces.findFirst({
-//     where: (pieces) => eq(pieces.id, pieceId) && eq(pieces.userId, session.userId),
-//   });
+    return c.json(piece);
+  } catch (error) {
+    console.error("Error fetching piece:", error);
+    return c.json({ error: "Failed to fetch piece" }, 500);
+  }
+});
 
-//   if (!piece) {
-//     return c.json({ error: "Piece not found" }, 404);
-//   }
+testRouter.post("/api/pieces", async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const fileData = formData.get("pdf");
+    if (!fileData || typeof fileData !== "object" || !("size" in fileData) || !("type" in fileData)) {
+      return c.json({ error: "Invalid file data" }, 400);
+    }
+    const file = fileData as File;
 
-//   return c.json({ piece });
-// });
+    const title = formData.get("title") as string;
+    const artist = formData.get("artist") as string;
 
-// piecesRouter.post("/", zValidator("form", createPieceSchema), async (c) => {
-//   const session = c.get("session") as UserSession;
-//   const formData = await c.req.formData();
-//   const title = formData.get("title") as string;
-//   const artist = formData.get("artist") as string;
-//   const id = formData.get("id") as string;
-//   const pdf = formData.get("pdf") as File;
+    if (!file || !title) {
+      return c.json({ error: "File and title are required" }, 400);
+    }
 
-//   if (!pdf) {
-//     return c.json({ error: "PDF file is required" }, 400);
-//   }
+    const { objectKey } = await uploadToR2(file, c.env);
+    const db = createDb(c.env.DB);
 
-//   try {
-//     const { s3Key, cdnUrl } = await uploadToS3(pdf);
-//     const pieceId = createId();
+    const piece = await db
+      .insert(pieceTable)
+      .values({
+        title,
+        artist: artist || null,
+        objectKey,
+        userId: "Test User",
+      })
+      .returning()
+      .get();
 
-//     const newPiece = await db
-//       .insert(piecesTable)
-//       .values({
-//         id,
-//         title,
-//         artist,
-//         s3Key,
-//         cdnUrl,
-//         userId: session.userId,
-//       })
-//       .returning();
+    return c.json(piece, 201);
+  } catch (error) {
+    console.error("Error creating piece:", error);
+    return c.json({ error: "Failed to create piece" }, 500);
+  }
+});
 
-//     return c.json({ piece: newPiece[0] }, 201);
-//   } catch (error: unknown) {
-//     console.error("Error creating piece:", error);
-//     if (error && typeof error === "object" && "code" in error) {
-//       if (error.code === "23505") {
-//         return c.json({ error: "Internal error - please try again" }, 500);
-//       }
-//     }
-//     return c.json({ error: "Failed to create piece" }, 500);
-//   }
-// });
+testRouter.delete("/api/pieces/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = createDb(c.env.DB);
 
-// piecesRouter.delete("/:id", async (c) => {
-//   const session = c.get("session") as UserSession;
-//   const pieceId = c.req.param("id");
+    const piece = await db.select().from(pieceTable).where(eq(pieceTable.id, id)).get();
 
-//   const piece = await db.query.pieces.findFirst({
-//     where: (pieces) => eq(pieces.id, pieceId) && eq(pieces.userId, session.userId),
-//   });
+    if (!piece) {
+      return c.json({ error: "Piece not found" }, 404);
+    }
 
-//   if (!piece) {
-//     return c.json({ error: "Piece not found" }, 404);
-//   }
+    if (piece.userId !== "Test User") {
+      return c.json({ error: "Unauthorized" }, 403);
+    }
 
-//   try {
-//     await deleteFromS3(piece.s3Key);
-//     await db.delete(piecesTable).where(eq(piecesTable.id, pieceId));
-//     return c.json({ success: true });
-//   } catch (error) {
-//     console.error("Error deleting piece:", error);
-//     return c.json({ error: "Failed to delete piece" }, 500);
-//   }
-// });
+    await db.delete(pieceTable).where(eq(pieceTable.id, id)).run();
 
-// export default piecesRouter;
+    try {
+      await c.env.BUCKET.delete(piece.objectKey);
+    } catch (r2Error) {
+      console.error("Error deleting file from R2:", r2Error);
+    }
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting piece:", error);
+    return c.json({ error: "Failed to delete piece" }, 500);
+  }
+});
+
+export default testRouter;

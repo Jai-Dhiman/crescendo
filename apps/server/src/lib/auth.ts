@@ -1,17 +1,32 @@
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { Hono } from "hono";
+import { createClerkClient } from "@clerk/backend";
+import type { Context, Next } from "hono";
 
-export const authMiddleware = async (c, next) => {
-  const sessionToken = c.req.header("Authorization")?.split(" ")[1];
+const clerk = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
 
-  if (!sessionToken) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-
+export const clerkMiddleware = async (c: Context, next: Next) => {
   try {
-    const session = await clerkClient.sessions.verifySession(sessionToken);
-    c.set("userId", session.userId);
+    const sessionToken = c.req.header("Authorization")?.split(" ")[1];
+    if (sessionToken) {
+      const session = await clerk.sessions.getSession(sessionToken);
+      if (session) {
+        c.set("auth", { userId: session.userId });
+      }
+    }
     await next();
   } catch (error) {
-    return c.json({ error: "Unauthorized" }, 401);
+    await next();
   }
 };
+
+export const requireAuth = () => async (c: Context, next: Next) => {
+  const auth = c.get("auth");
+  if (!auth?.userId) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  await next();
+};
+
+const app = new Hono();

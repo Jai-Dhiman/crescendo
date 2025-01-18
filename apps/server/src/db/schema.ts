@@ -7,8 +7,7 @@ export const pieces = sqliteTable("piece", {
     .$defaultFn(() => createId()),
   title: text("title").notNull(),
   artist: text("artist"),
-  s3Key: text("s3_key").notNull(),
-  cdnUrl: text("cdn_url").notNull(),
+  objectKey: text("object_key").notNull(),
   userId: text("user_id").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
@@ -30,10 +29,10 @@ export const recordings = sqliteTable("recording", {
     .primaryKey()
     .$defaultFn(() => createId()),
   title: text("title").notNull(),
-  s3Key: text("s3_key").notNull(),
-  cdnUrl: text("cdn_url").notNull(),
+  objectKey: text("object_key").notNull(),
   notes: text("notes"),
   pieceId: text("piece_id").references(() => pieces.id, { onDelete: "cascade" }),
+
   userId: text("user_id").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });

@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
-import { authMiddleware } from "@/lib/auth";
-import webhookRouter from "./routes/webhook";
+import { clerkMiddleware, requireAuth } from "@/lib/auth";
 import healthCheck from "@/routes/health";
+import testRouter from "@/routes/pieces";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -28,10 +28,20 @@ app.use(
 
 app.use("*", logger());
 app.use("*", prettyJSON());
-app.use("/api/*", authMiddleware);
-app.route("/api", webhookRouter);
+app.use("/api/*", clerkMiddleware);
 
 app.route("/health", healthCheck);
+app.route("/", testRouter);
+
+app.get("/api/bucket-contents", async (c) => {
+  try {
+    const listed = await c.env.BUCKET.list();
+    return c.json(listed.objects);
+  } catch (error) {
+    console.error("Error listing bucket:", error);
+    return c.json({ error: "Failed to list bucket contents" }, 500);
+  }
+});
 
 export default {
   fetch: app.fetch,

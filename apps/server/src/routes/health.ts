@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/d1";
-import { users } from "../db/schema";
+import { pieces as piecesTable } from "@/db/schema";
 
 interface Bindings {
   DB: D1Database;
@@ -40,7 +40,7 @@ route.get("/", async (c) => {
   };
 
   try {
-    await db.select({ id: users.id }).from(users).limit(1);
+    await db.select({ id: piecesTable.id }).from(piecesTable).limit(1);
   } catch (error) {
     health.status = "unhealthy";
     health.services.database = {
