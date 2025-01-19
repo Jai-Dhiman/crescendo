@@ -39,20 +39,20 @@ export function GetPieces<T>() {
   });
 }
 
-export function GetPieceById<T>() {
+export function GetPieceById<T>(id: string) {
   const { getToken } = useAuth();
-  return useMutation<T, Error, string>({
-    mutationFn: async (id: string) => {
+  return useQuery({
+    queryKey: ["piece", id],
+    queryFn: async () => {
       const token = await getToken();
       if (!token) throw new Error("No auth token available");
-
       try {
         const response = await api.get(`${PIECES_BASE_URL}/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        return response.data;
+        return response.data as T;
       } catch (error) {
         console.error("GET request failed:", error);
         throw error;
@@ -60,7 +60,6 @@ export function GetPieceById<T>() {
     },
   });
 }
-
 export function CreatePiece<T>() {
   const queryClient = useQueryClient();
   const { getToken } = useAuth();

@@ -14,8 +14,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SignUpImport } from './routes/sign-up'
 import { Route as SignInImport } from './routes/sign-in'
 import { Route as PieceLibraryImport } from './routes/pieceLibrary'
-import { Route as PieceImport } from './routes/piece'
 import { Route as IndexImport } from './routes/index'
+import { Route as PiecePieceIdImport } from './routes/piece.$pieceId'
 
 // Create/Update Routes
 
@@ -37,15 +37,15 @@ const PieceLibraryRoute = PieceLibraryImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const PieceRoute = PieceImport.update({
-  id: '/piece',
-  path: '/piece',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PiecePieceIdRoute = PiecePieceIdImport.update({
+  id: '/piece/$pieceId',
+  path: '/piece/$pieceId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -58,13 +58,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/piece': {
-      id: '/piece'
-      path: '/piece'
-      fullPath: '/piece'
-      preLoaderRoute: typeof PieceImport
       parentRoute: typeof rootRoute
     }
     '/pieceLibrary': {
@@ -88,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpImport
       parentRoute: typeof rootRoute
     }
+    '/piece/$pieceId': {
+      id: '/piece/$pieceId'
+      path: '/piece/$pieceId'
+      fullPath: '/piece/$pieceId'
+      preLoaderRoute: typeof PiecePieceIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -95,52 +95,58 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/piece/$pieceId': typeof PiecePieceIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/piece/$pieceId': typeof PiecePieceIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/piece/$pieceId': typeof PiecePieceIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/piece' | '/pieceLibrary' | '/sign-in' | '/sign-up'
+  fullPaths: '/' | '/pieceLibrary' | '/sign-in' | '/sign-up' | '/piece/$pieceId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/piece' | '/pieceLibrary' | '/sign-in' | '/sign-up'
-  id: '__root__' | '/' | '/piece' | '/pieceLibrary' | '/sign-in' | '/sign-up'
+  to: '/' | '/pieceLibrary' | '/sign-in' | '/sign-up' | '/piece/$pieceId'
+  id:
+    | '__root__'
+    | '/'
+    | '/pieceLibrary'
+    | '/sign-in'
+    | '/sign-up'
+    | '/piece/$pieceId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PieceRoute: typeof PieceRoute
   PieceLibraryRoute: typeof PieceLibraryRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  PiecePieceIdRoute: typeof PiecePieceIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PieceRoute: PieceRoute,
   PieceLibraryRoute: PieceLibraryRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  PiecePieceIdRoute: PiecePieceIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -154,17 +160,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/piece",
         "/pieceLibrary",
         "/sign-in",
-        "/sign-up"
+        "/sign-up",
+        "/piece/$pieceId"
       ]
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/piece": {
-      "filePath": "piece.tsx"
     },
     "/pieceLibrary": {
       "filePath": "pieceLibrary.tsx"
@@ -174,6 +177,9 @@ export const routeTree = rootRoute
     },
     "/sign-up": {
       "filePath": "sign-up.tsx"
+    },
+    "/piece/$pieceId": {
+      "filePath": "piece.$pieceId.tsx"
     }
   }
 }

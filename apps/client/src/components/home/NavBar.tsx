@@ -27,27 +27,9 @@ export function Navigation() {
               >
                 Library
               </Link>
-              <Link
-                to="/piece"
-                activeProps={{
-                  className: 'font-recia-medium text-primary-500',
-                }}
-                className="font-recia-regular hover:text-primary-500 transition-colors"
-              >
-                Individual Piece
-              </Link>
             </SignedIn>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <SignedIn>
-            <div className="relative">
-              <input
-                className="input-modern w-64"
-                placeholder="Search pieces..."
-              />
-            </div>
-          </SignedIn>
           <div className="flex items-center gap-4">
             <SignedIn>
               <UserButton afterSignOutUrl="/" />
@@ -66,7 +48,6 @@ export function Navigation() {
                 Sign Up
               </Link>
             </SignedOut>
-          </div>
         </div>
       </div>
     </nav>
