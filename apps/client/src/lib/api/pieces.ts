@@ -1,52 +1,49 @@
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
+import type { CreatePiece } from "@crescendo/validation/src/api";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8787",
   withCredentials: true,
 });
-
-type CreatePieceInput = {
-  title: string;
-  file: File;
-};
 
 const PIECES_BASE_URL = "/api/pieces";
 
 export function GetPieces<T>() {
+  const { getToken } = useAuth();
+
   return useQuery<T>({
     queryKey: ["pieces"],
     queryFn: async () => {
-      const response = await fetch(PIECES_BASE_URL);
+      const token = await getToken();
+      const response = await fetch(PIECES_BASE_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       return data;
     },
-  });
-}
-
-export function GetPieceById<T>(id: string) {
-  return useQuery<T>({
-    queryKey: ["pieces", id],
-    queryFn: async () => {
-      const response = await fetch(`${PIECES_BASE_URL}/${id}`);
-      const data = await response.json();
-      return data;
-    },
-    enabled: !!id,
   });
 }
 
 export function CreatePiece<T>() {
   const queryClient = useQueryClient();
-  return useMutation<T, Error, CreatePieceInput>({
-    mutationFn: async ({ title, file }) => {
+  const { getToken } = useAuth();
+
+  return useMutation<T, Error, CreatePiece>({
+    mutationFn: async ({ title, artist, file }) => {
+      const token = await getToken();
       const formData = new FormData();
       formData.append("title", title);
+      if (artist) formData.append("artist", artist);
       formData.append("pdf", file);
 
-      const { data } = await api.post(PIECES_BASE_URL, formData, {
+      const { data } = await axios.post(PIECES_BASE_URL, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       });
       return data;

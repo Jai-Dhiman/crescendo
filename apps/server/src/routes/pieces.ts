@@ -3,20 +3,16 @@ import { uploadToR2 } from "@/lib/r2";
 import { pieces as pieceTable } from "@/db/schema";
 import { createDb } from "@/db";
 import { eq } from "drizzle-orm";
+import { requireAuth } from "@/lib/auth";
+import type { CustomBindings } from "@/types/auth";
 
-export interface Env {
-  BUCKET: R2Bucket;
-  R2_PUBLIC_URL: string;
-  DB: D1Database;
-}
+const pieceRouter = new Hono<CustomBindings>();
 
-const testRouter = new Hono<{ Bindings: Env }>();
-
-testRouter.get("/api/pieces", async (c) => {
+pieceRouter.get("/api/pieces", requireAuth(), async (c) => {
   try {
+    const auth = c.get("auth");
     const db = createDb(c.env.DB);
-    const pieces = await db.select().from(pieceTable).where(eq(pieceTable.userId, "Test User")).all();
-
+    const pieces = await db.select().from(pieceTable).where(eq(pieceTable.userId, auth.userId)).all();
     return c.json(pieces);
   } catch (error) {
     console.error("Error fetching pieces:", error);
@@ -24,7 +20,7 @@ testRouter.get("/api/pieces", async (c) => {
   }
 });
 
-testRouter.get("/api/pieces/:id", async (c) => {
+pieceRouter.get("/api/pieces/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const db = createDb(c.env.DB);
@@ -41,8 +37,9 @@ testRouter.get("/api/pieces/:id", async (c) => {
   }
 });
 
-testRouter.post("/api/pieces", async (c) => {
+pieceRouter.post("/api/pieces", requireAuth(), async (c) => {
   try {
+    const auth = c.get("auth");
     const formData = await c.req.formData();
     const fileData = formData.get("pdf");
     if (!fileData || typeof fileData !== "object" || !("size" in fileData) || !("type" in fileData)) {
@@ -59,18 +56,16 @@ testRouter.post("/api/pieces", async (c) => {
 
     const { objectKey } = await uploadToR2(file, c.env);
     const db = createDb(c.env.DB);
-
     const piece = await db
       .insert(pieceTable)
       .values({
         title,
         artist: artist || null,
         objectKey,
-        userId: "Test User",
+        userId: auth.userId,
       })
       .returning()
       .get();
-
     return c.json(piece, 201);
   } catch (error) {
     console.error("Error creating piece:", error);
@@ -78,7 +73,7 @@ testRouter.post("/api/pieces", async (c) => {
   }
 });
 
-testRouter.delete("/api/pieces/:id", async (c) => {
+pieceRouter.delete("/api/pieces/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const db = createDb(c.env.DB);
@@ -108,4 +103,4 @@ testRouter.delete("/api/pieces/:id", async (c) => {
   }
 });
 
-export default testRouter;
+export default pieceRouter;

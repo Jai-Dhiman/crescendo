@@ -2,19 +2,14 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
-import { clerkMiddleware, requireAuth } from "@/lib/auth";
+import { clerkMiddleware } from "@/lib/auth";
+import type { CustomBindings } from "./types/auth";
 import healthCheck from "@/routes/health";
-import testRouter from "@/routes/pieces";
+import pieceRouter from "@/routes/pieces";
 import dotenv from "dotenv";
 dotenv.config();
 
-type Bindings = {
-  DB: D1Database;
-  BUCKET: R2Bucket;
-  CF_ACCESS_AUD: string;
-};
-
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<CustomBindings>();
 
 app.use(
   "*",
@@ -31,7 +26,7 @@ app.use("*", prettyJSON());
 app.use("/api/*", clerkMiddleware);
 
 app.route("/health", healthCheck);
-app.route("/", testRouter);
+app.route("/", pieceRouter);
 
 app.get("/api/bucket-contents", async (c) => {
   try {

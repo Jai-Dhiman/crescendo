@@ -1,15 +1,6 @@
 import { GetPieces, CreatePiece } from '@/lib/api/pieces';
 import { useState } from 'react';
-
-interface Piece {
-  id: string;
-  title: string;
-  s3Key: string;
-  cdnUrl: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Piece } from '@crescendo/validation/src/api';
 
 interface PiecesResponse {
   pieces: Piece[];
@@ -24,10 +15,11 @@ export function LibraryComponent() {
     setIsAddingPiece(true);
   };
 
-  const handleFileUpload = async (title: string, file: File) => {
+  const handleFileUpload = async (title: string, artist: string | undefined, file: File) => {
     try {
       await createPieceMutation.mutateAsync({
         title,
+        artist,
         file,
       });
       setIsAddingPiece(false);
@@ -43,7 +35,7 @@ export function LibraryComponent() {
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-recia-medium mb-2">Your Piece Library</h1>
+            <h1 className="text-3xl font-recia-medium mb-2">Your Music Library</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your musical pieces</p>
           </div>
         </div>
@@ -56,9 +48,9 @@ export function LibraryComponent() {
             onClick={handleAddNewPiece}
           >
             <div className="aspect-[4/5] bg-gray-100 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden flex items-center justify-center relative">
-            <span className="i-heroicons-plus text-6xl text-gray-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></span>
+              <span className="i-heroicons-plus text-6xl text-gray-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></span>
             </div>
-            <h3 className="text-lg font-recia-medium mb-1">Add New Piece</h3>
+            <h3 className="text-lg font-recia-medium mb-1">Add New Music</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Upload sheet music to your library</p>
           </div>
 
@@ -71,10 +63,10 @@ export function LibraryComponent() {
                 </div>
               </div>
               <h3 className="text-lg font-recia-medium mb-1">{piece.title}</h3>
-              <div className="mt-4 flex justify-between items-center">
-                <span className="text-sm text-primary-600 dark:text-primary-400">
-                  Added {new Date(piece.createdAt).toLocaleDateString()}
-                </span>
+              {piece.artist && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{piece.artist}</p>
+              )}
+              <div className="mt-4 flex justify-end">
                 <button className="btn-soft scale-90 opacity-0 group-hover:opacity-100 transition-all">
                   Start Practice
                 </button>
@@ -107,9 +99,10 @@ export function LibraryComponent() {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
                 const title = formData.get('title') as string;
+                const artist = formData.get('artist') as string;
                 const file = formData.get('file') as File;
                 if (title && file) {
-                  handleFileUpload(title, file);
+                  handleFileUpload(title, artist || undefined, file);
                 }
               }}>
                 <input
@@ -118,6 +111,12 @@ export function LibraryComponent() {
                   placeholder="Piece Title"
                   className="input-modern w-full mb-4"
                   required
+                />
+                <input
+                  type="text"
+                  name="artist"
+                  placeholder="Artist (Optional)"
+                  className="input-modern w-full mb-4"
                 />
                 <input
                   type="file"

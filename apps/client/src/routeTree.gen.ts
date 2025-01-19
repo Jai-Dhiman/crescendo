@@ -11,11 +11,25 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SignUpImport } from './routes/sign-up'
+import { Route as SignInImport } from './routes/sign-in'
 import { Route as PieceLibraryImport } from './routes/pieceLibrary'
 import { Route as PieceImport } from './routes/piece'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const SignUpRoute = SignUpImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SignInRoute = SignInImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const PieceLibraryRoute = PieceLibraryImport.update({
   id: '/pieceLibrary',
@@ -60,6 +74,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PieceLibraryImport
       parentRoute: typeof rootRoute
     }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -69,12 +97,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
 }
 
 export interface FileRoutesById {
@@ -82,14 +114,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/piece': typeof PieceRoute
   '/pieceLibrary': typeof PieceLibraryRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/piece' | '/pieceLibrary'
+  fullPaths: '/' | '/piece' | '/pieceLibrary' | '/sign-in' | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/piece' | '/pieceLibrary'
-  id: '__root__' | '/' | '/piece' | '/pieceLibrary'
+  to: '/' | '/piece' | '/pieceLibrary' | '/sign-in' | '/sign-up'
+  id: '__root__' | '/' | '/piece' | '/pieceLibrary' | '/sign-in' | '/sign-up'
   fileRoutesById: FileRoutesById
 }
 
@@ -97,12 +131,16 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PieceRoute: typeof PieceRoute
   PieceLibraryRoute: typeof PieceLibraryRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PieceRoute: PieceRoute,
   PieceLibraryRoute: PieceLibraryRoute,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
 }
 
 export const routeTree = rootRoute
@@ -117,7 +155,9 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/piece",
-        "/pieceLibrary"
+        "/pieceLibrary",
+        "/sign-in",
+        "/sign-up"
       ]
     },
     "/": {
@@ -128,6 +168,12 @@ export const routeTree = rootRoute
     },
     "/pieceLibrary": {
       "filePath": "pieceLibrary.tsx"
+    },
+    "/sign-in": {
+      "filePath": "sign-in.tsx"
+    },
+    "/sign-up": {
+      "filePath": "sign-up.tsx"
     }
   }
 }

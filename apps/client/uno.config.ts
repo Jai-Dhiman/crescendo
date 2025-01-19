@@ -34,15 +34,15 @@ export default defineConfig({
   },
   shortcuts: {
     btn: "px-4 py-2 rounded-full font-recia-medium transition-colors duration-200",
-    "btn-primary": "bg-primary-500 hover:bg-primary-600 text-white",
-    "btn-outline": "border border-primary-500 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900",
+    "btn-primary": "btn bg-primary-500 hover:bg-primary-600 text-white",
+    "btn-outline": "btn border border-primary-500 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900",
 
     "btn-soft":
-      "px-4 py-2 rounded-full font-recia-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors duration-200",
+      "btn px-4 py-2 rounded-full font-recia-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors duration-200",
     "btn-gradient":
-      "px-4 py-2 rounded-lg font-recia-medium bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-sm transition-all duration-200 hover:shadow-md",
+      "btn px-4 py-2 rounded-lg font-recia-medium bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-sm transition-all duration-200 hover:shadow-md",
     "btn-glow":
-      "px-4 py-2 rounded-lg font-recia-medium bg-primary-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.5)] hover:shadow-[0_0_25px_rgba(249,115,22,0.6)] transition-all duration-200",
+      "btn px-4 py-2 rounded-lg font-recia-medium bg-primary-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.5)] hover:shadow-[0_0_25px_rgba(249,115,22,0.6)] transition-all duration-200",
 
     "input-modern":
       "px-4 py-3 rounded-xl border-2 bg-white/5 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200",

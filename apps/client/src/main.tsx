@@ -6,7 +6,7 @@ import {
   createRouter,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Spinner } from '@/components/Spinner'
+import { Spinner } from '@/components/utils/Spinner'
 import { routeTree } from '@/routeTree.gen'
 import { ClerkProvider } from '@clerk/clerk-react'
 import '@unocss/reset/tailwind.css'
