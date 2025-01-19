@@ -6,7 +6,6 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { Spinner } from '@/components/utils/Spinner';
 import { GetPiecePdf } from '@/lib/api/pieces';
 import { useEffect } from 'react';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
 interface MainContentProps {
   piece: Piece;
@@ -17,7 +16,6 @@ export function MainContent({ piece }: MainContentProps) {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <TopBar piece={piece} />
       <PdfViewer piece={piece} />
-      <PageNavigation />
     </div>
   );
 }
@@ -36,17 +34,6 @@ function TopBar({ piece }: TopBarProps) {
         {piece.artist && (
           <p className="text-sm text-gray-600 dark:text-gray-400">{piece.artist}</p>
         )}
-      </div>
-      <div className="flex gap-2">
-        <button className="btn-soft">
-          <span>100%</span>
-        </button>
-        <button className="btn-soft">
-          <span>Annotate</span>
-        </button>
-        <button className="btn-soft">
-          <span>Bookmarks</span>
-        </button>
       </div>
     </div>
   );
@@ -86,9 +73,8 @@ function PdfViewer({ piece }: PdfViewerProps) {
 
   return (
     <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6 overflow-auto">
-      <div className="card-basic h-full">
-        {/* <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js"> */}
-        <Worker workerUrl={pdfjsWorker}>
+      <div className="card-basic full">
+        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
           <Viewer
             fileUrl={pdfUrl}
             plugins={[defaultLayoutPluginInstance]}
@@ -99,16 +85,6 @@ function PdfViewer({ piece }: PdfViewerProps) {
           />
         </Worker>
       </div>
-    </div>
-  );
-}
-
-function PageNavigation() {
-  return (
-    <div className="h-12 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white dark:bg-gray-800">
-      <button className="btn-soft">Previous Page</button>
-      <div className="text-sm text-gray-600 dark:text-gray-300">Page 1 of 4</div>
-      <button className="btn-soft">Next Page</button>
     </div>
   );
 }

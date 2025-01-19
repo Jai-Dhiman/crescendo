@@ -97,8 +97,9 @@ pieceRouter.post("/api/pieces", requireAuth(), async (c) => {
   }
 });
 
-pieceRouter.delete("/api/pieces/:id", async (c) => {
+pieceRouter.delete("/api/pieces/:id", requireAuth(), async (c) => {
   try {
+    const auth = c.get("auth");
     const id = c.req.param("id");
     const db = createDb(c.env.DB);
 
@@ -108,7 +109,7 @@ pieceRouter.delete("/api/pieces/:id", async (c) => {
       return c.json({ error: "Piece not found" }, 404);
     }
 
-    if (piece.userId !== "Test User") {
+    if (piece.userId !== auth.userId) {
       return c.json({ error: "Unauthorized" }, 403);
     }
 

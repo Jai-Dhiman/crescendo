@@ -3,7 +3,6 @@ import { useParams } from '@tanstack/react-router';
 import { GetPieceById } from '@/lib/api/pieces';
 import { PracticeSidebar } from './PieceComponents/PracticeSidebar';
 import { MainContent } from './PieceComponents/MainContent';
-import { PageMinimap } from './PieceComponents/PageMinimap';
 import { Spinner } from '../utils/Spinner';
 import type { Piece } from '@crescendo/validation/src/schema';
 
@@ -21,9 +20,8 @@ export function PieceComponent() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <PracticeSidebar />
+      <PracticeSidebar pieceId={pieceId} />
       <MainContent piece={piece} />
-      {/* <PageMinimap /> */}
     </div>
   );
 }
