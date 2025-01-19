@@ -1,6 +1,6 @@
 export function PracticeSidebar() {
   return (
-    <div className="w-80 border-r border-gray-200 dark:border-gray-800 h-full flex flex-col p-4 bg-white dark:bg-gray-800">
+    <div className="w-60 border-r border-gray-200 dark:border-gray-800 h-full flex flex-col p-4 bg-white dark:bg-gray-800">
       <PracticeTools />
       <PracticeHistory />
       <RecordingsSection />

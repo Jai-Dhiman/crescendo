@@ -1,6 +1,6 @@
 import { createClerkClient } from "@clerk/backend";
 import type { Context, Next } from "hono";
-import type { CustomBindings } from "@/types/auth";
+import type { CustomBindings } from "@/types";
 
 export const clerkMiddleware = async (c: Context<CustomBindings>, next: Next) => {
   try {

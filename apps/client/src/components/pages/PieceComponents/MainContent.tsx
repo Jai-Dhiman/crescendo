@@ -1,4 +1,12 @@
-import type { Piece } from '@crescendo/validation/src/api';
+import type { Piece } from '@crescendo/validation/src/schema';
+import { Viewer, Worker } from '@react-pdf-viewer/core';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { Spinner } from '@/components/utils/Spinner';
+import { GetPiecePdf } from '@/lib/api/pieces';
+import { useEffect } from 'react';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
 interface MainContentProps {
   piece: Piece;
@@ -8,7 +16,7 @@ export function MainContent({ piece }: MainContentProps) {
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <TopBar piece={piece} />
-      <PdfViewer />
+      <PdfViewer piece={piece} />
       <PageNavigation />
     </div>
   );
@@ -44,11 +52,52 @@ function TopBar({ piece }: TopBarProps) {
   );
 }
 
-function PdfViewer() {
+interface PdfViewerProps {
+  piece: Piece;
+}
+
+function PdfViewer({ piece }: PdfViewerProps) {
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const { data: pdfUrl, isLoading, isError } = GetPiecePdf(piece.id);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError || !pdfUrl) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-red-500">
+        Error loading PDF
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6 overflow-auto">
-      <div className="card-basic h-full flex items-center justify-center">
-        <span className="text-gray-500">PDF Viewer</span>
+      <div className="card-basic h-full">
+        {/* <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js"> */}
+        <Worker workerUrl={pdfjsWorker}>
+          <Viewer
+            fileUrl={pdfUrl}
+            plugins={[defaultLayoutPluginInstance]}
+            defaultScale={1}
+            theme={{
+              theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+            }}
+          />
+        </Worker>
       </div>
     </div>
   );

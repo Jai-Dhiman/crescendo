@@ -3,7 +3,7 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
 import { clerkMiddleware } from "@/lib/auth";
-import type { CustomBindings } from "./types/auth";
+import type { CustomBindings } from "./types";
 import healthCheck from "@/routes/health";
 import pieceRouter from "@/routes/pieces";
 import dotenv from "dotenv";

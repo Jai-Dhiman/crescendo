@@ -4,7 +4,7 @@ import { pieces as pieceTable } from "@/db/schema";
 import { createDb } from "@/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
-import type { CustomBindings } from "@/types/auth";
+import type { CustomBindings } from "@/types";
 
 const pieceRouter = new Hono<CustomBindings>();
 
@@ -34,6 +34,30 @@ pieceRouter.get("/api/pieces/:id", async (c) => {
   } catch (error) {
     console.error("Error fetching piece:", error);
     return c.json({ error: "Failed to fetch piece" }, 500);
+  }
+});
+
+pieceRouter.get("/api/pieces/:id/pdf", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = createDb(c.env.DB);
+
+    const piece = await db.select().from(pieceTable).where(eq(pieceTable.id, id)).get();
+    if (!piece) {
+      return c.json({ error: "Piece not found" }, 404);
+    }
+
+    const file = await c.env.BUCKET.get(piece.objectKey);
+    if (!file) {
+      return c.json({ error: "PDF not found" }, 404);
+    }
+
+    c.header("Content-Type", "application/pdf");
+    c.header("Content-Disposition", `inline; filename="${piece.title}.pdf"`);
+    return c.body(await file.arrayBuffer());
+  } catch (error) {
+    console.error("Error fetching PDF:", error);
+    return c.json({ error: "Failed to fetch PDF" }, 500);
   }
 });
 

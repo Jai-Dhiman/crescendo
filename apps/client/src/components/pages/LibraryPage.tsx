@@ -1,6 +1,6 @@
 import { GetPieces } from '@/lib/api/pieces';
 import { useState } from 'react';
-import type { Piece } from '@crescendo/validation/src/api';
+import type { Piece } from '@crescendo/validation/src/schema';
 import { AddPieceModal } from './LibraryComponents/AddPieceModal';
 import { PiecesGrid } from './LibraryComponents/PiecesGrid';
 import { RecommendedPieces } from './LibraryComponents/RecommendedPieces';

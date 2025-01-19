@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import type { CreatePiece } from "@crescendo/validation/src/api";
+import type { CreatePiece } from "@crescendo/validation/src/schema";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8787",
@@ -60,6 +60,33 @@ export function GetPieceById<T>(id: string) {
     },
   });
 }
+
+export function GetPiecePdf(id: string) {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: ["piece-pdf", id],
+    queryFn: async () => {
+      const token = await getToken();
+      if (!token) throw new Error("No auth token available");
+
+      try {
+        const response = await api.get(`${PIECES_BASE_URL}/${id}/pdf`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        });
+
+        return URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+      } catch (error) {
+        console.error("GET PDF request failed:", error);
+        throw error;
+      }
+    },
+  });
+}
+
 export function CreatePiece<T>() {
   const queryClient = useQueryClient();
   const { getToken } = useAuth();

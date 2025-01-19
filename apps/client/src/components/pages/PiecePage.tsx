@@ -5,7 +5,7 @@ import { PracticeSidebar } from './PieceComponents/PracticeSidebar';
 import { MainContent } from './PieceComponents/MainContent';
 import { PageMinimap } from './PieceComponents/PageMinimap';
 import { Spinner } from '../utils/Spinner';
-import type { Piece } from '@crescendo/validation/src/api';
+import type { Piece } from '@crescendo/validation/src/schema';
 
 export function PieceComponent() {
   const { pieceId } = useParams({ from: '/piece/$pieceId' });
@@ -23,7 +23,7 @@ export function PieceComponent() {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <PracticeSidebar />
       <MainContent piece={piece} />
-      <PageMinimap />
+      {/* <PageMinimap /> */}
     </div>
   );
 }

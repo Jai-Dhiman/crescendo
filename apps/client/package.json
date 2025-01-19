@@ -13,6 +13,8 @@
     "@clerk/clerk-react": "^5.22.0",
     "@clerk/types": "^4.41.1",
     "@crescendo/validation": "workspace:*",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
     "@tanstack/react-form": "^0.41.0",
     "@tanstack/react-query": "^5.64.1",
     "@tanstack/react-query-devtools": "^5.62.11",
@@ -20,6 +22,7 @@
     "@tanstack/router-devtools": "^1.92.11",
     "@unocss/reset": "^0.65.3",
     "axios": "^1.7.9",
+    "pdfjs-dist": "^3.4.120",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-pdf": "^9.2.1"
@@ -27,9 +30,9 @@
   "devDependencies": {
     "@iconify-json/heroicons": "^1.2.2",
     "@tanstack/router-plugin": "^1.92.11",
+    "@types/pdfjs-dist": "^2.10.378",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/react-pdf": "^7.0.0",
     "@unocss/preset-icons": "^65.4.0",
     "@vitejs/plugin-react": "^4.3.2",
     "unocss": "^0.65.3",

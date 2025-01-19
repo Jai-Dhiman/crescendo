@@ -1,4 +1,4 @@
-import type { Piece } from '@crescendo/validation/src/api';
+import type { Piece } from '@crescendo/validation/src/schema';
 import { useNavigate } from '@tanstack/react-router';
 
 interface PieceCardProps {
