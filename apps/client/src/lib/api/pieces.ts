@@ -15,16 +15,48 @@ const PIECES_BASE_URL = "/api/pieces";
 
 export function GetPieces<T>() {
   const { getToken } = useAuth();
+
   return useQuery<T>({
     queryKey: ["pieces"],
     queryFn: async () => {
       const token = await getToken();
-      const { data } = await api.get(PIECES_BASE_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return data;
+      if (!token) throw new Error("No auth token available");
+
+      try {
+        const response = await api.get(PIECES_BASE_URL, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error("GET request failed:", error);
+        throw error;
+      }
+    },
+    retry: 2,
+    retryDelay: 1000,
+  });
+}
+
+export function GetPieceById<T>() {
+  const { getToken } = useAuth();
+  return useMutation<T, Error, string>({
+    mutationFn: async (id: string) => {
+      const token = await getToken();
+      if (!token) throw new Error("No auth token available");
+
+      try {
+        const response = await api.get(`${PIECES_BASE_URL}/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error("GET request failed:", error);
+        throw error;
+      }
     },
   });
 }
@@ -57,13 +89,22 @@ export function CreatePiece<T>() {
 
 export function DeletePiece() {
   const queryClient = useQueryClient();
+  const { getToken } = useAuth();
+
   return useMutation<void, Error, string>({
-    mutationFn: async (id) => {
-      const response = await fetch(`${PIECES_BASE_URL}/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete piece");
+    mutationFn: async (id: string) => {
+      const token = await getToken();
+      if (!token) throw new Error("No auth token available");
+
+      try {
+        await api.delete(`${PIECES_BASE_URL}/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (error) {
+        console.error("DELETE request failed:", error);
+        throw error;
       }
     },
     onSuccess: () => {

@@ -10,11 +10,11 @@ export const clerkMiddleware = async (c: Context<CustomBindings>, next: Next) =>
     });
 
     const authHeader = c.req.header("Authorization");
-    const sessionToken = authHeader?.split(" ")[1];
 
+    const sessionToken = authHeader?.split(" ")[1];
     if (!sessionToken) {
-      await next();
-      return;
+      console.log("No session token found");
+      return c.json({ error: "No token provided" }, 401);
     }
 
     const verificationRequest = new Request(c.env.API_URL || "http://localhost:8787", {
@@ -36,13 +36,15 @@ export const clerkMiddleware = async (c: Context<CustomBindings>, next: Next) =>
           userId: authData.userId,
           sessionId: authData.sessionId || "",
         });
+        await next();
+        return;
       }
     }
 
-    await next();
+    return c.json({ error: "Authentication failed" }, 401);
   } catch (error) {
-    console.error("Auth error:", error);
-    await next();
+    console.error("Auth middleware error:", error);
+    return c.json({ error: "Authentication failed" }, 401);
   }
 };
 
