@@ -6,23 +6,24 @@ import type { CreatePiece } from "@crescendo/validation/src/api";
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8787",
   withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 const PIECES_BASE_URL = "/api/pieces";
 
 export function GetPieces<T>() {
   const { getToken } = useAuth();
-
   return useQuery<T>({
     queryKey: ["pieces"],
     queryFn: async () => {
       const token = await getToken();
-      const response = await fetch(PIECES_BASE_URL, {
+      const { data } = await api.get(PIECES_BASE_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await response.json();
       return data;
     },
   });

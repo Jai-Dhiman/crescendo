@@ -2,12 +2,9 @@ import { GetPieces, CreatePiece } from '@/lib/api/pieces';
 import { useState } from 'react';
 import type { Piece } from '@crescendo/validation/src/api';
 
-interface PiecesResponse {
-  pieces: Piece[];
-}
 
 export function LibraryComponent() {
-  const { data: pieces } = GetPieces<PiecesResponse>();
+  const { data: pieces } = GetPieces<Piece[]>();
   const [isAddingPiece, setIsAddingPiece] = useState(false);
   const createPieceMutation = CreatePiece();
 
@@ -55,7 +52,7 @@ export function LibraryComponent() {
           </div>
 
           {/* Existing Pieces */}
-          {Array.isArray(pieces?.pieces) && pieces.pieces.map((piece) => (
+          {Array.isArray(pieces) && pieces.map((piece) => (
             <div key={piece.id} className="card-hover group">
               <div className="aspect-[4/5] bg-gray-100 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center text-gray-400">

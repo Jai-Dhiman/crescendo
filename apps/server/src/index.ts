@@ -14,10 +14,11 @@ const app = new Hono<CustomBindings>();
 app.use(
   "*",
   cors({
-    origin: process.env.CLIENT_URL || "localhost:3001",
+    origin: process.env.CLIENT_URL || "http://localhost:3001",
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Cf-Access-Jwt-Assertion"],
+    allowHeaders: ["Content-Type", "Authorization", "Cookie", "X-Requested-With"],
+    exposeHeaders: ["Set-Cookie"],
   })
 );
 
@@ -27,16 +28,6 @@ app.use("/api/*", clerkMiddleware);
 
 app.route("/health", healthCheck);
 app.route("/", pieceRouter);
-
-app.get("/api/bucket-contents", async (c) => {
-  try {
-    const listed = await c.env.BUCKET.list();
-    return c.json(listed.objects);
-  } catch (error) {
-    console.error("Error listing bucket:", error);
-    return c.json({ error: "Failed to list bucket contents" }, 500);
-  }
-});
 
 export default {
   fetch: app.fetch,
