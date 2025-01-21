@@ -1,11 +1,11 @@
 import type { Piece } from '@crescendo/validation/src/schema';
-import { Viewer, Worker } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { Spinner } from '@/components/utils/Spinner';
 import { GetPiecePdf } from '@/lib/api/pieces';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 interface MainContentProps {
   piece: Piece;
@@ -44,16 +44,75 @@ interface PdfViewerProps {
 }
 
 function PdfViewer({ piece }: PdfViewerProps) {
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [scale, setScale] = useState(1.5);
+  
   const { data: pdfUrl, isLoading, isError } = GetPiecePdf(piece.id);
 
   useEffect(() => {
+    if (!pdfUrl) return;
+
+    const loadPdf = async () => {
+      try {
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        setPdfDoc(pdf);
+        renderPage(pdf, 1);
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+      }
+    };
+
+    loadPdf();
+
     return () => {
       if (pdfUrl) {
         URL.revokeObjectURL(pdfUrl);
       }
     };
   }, [pdfUrl]);
+
+  const renderPage = async (pdf: PDFDocumentProxy, pageNumber: number) => {
+    if (!canvasRef.current) return;
+
+    const page = await pdf.getPage(pageNumber);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    
+    if (!context) return;
+
+    const viewport = page.getViewport({ scale });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport,
+    };
+
+    await page.render(renderContext).promise;
+  };
+
+  const changePage = async (delta: number) => {
+    if (!pdfDoc) return;
+    
+    const newPage = currentPage + delta;
+    if (newPage >= 1 && newPage <= pdfDoc.numPages) {
+      setCurrentPage(newPage);
+      await renderPage(pdfDoc, newPage);
+    }
+  };
+
+  const handleZoom = (factor: number) => {
+    setScale(prevScale => {
+      const newScale = prevScale * factor;
+      if (pdfDoc) {
+        renderPage(pdfDoc, currentPage);
+      }
+      return newScale;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -73,17 +132,35 @@ function PdfViewer({ piece }: PdfViewerProps) {
 
   return (
     <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6 overflow-auto">
-      <div className="card-basic full">
-        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-          <Viewer
-            fileUrl={pdfUrl}
-            plugins={[defaultLayoutPluginInstance]}
-            defaultScale={1}
-            theme={{
-              theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-            }}
-          />
-        </Worker>
+      <div className="card-basic w-full flex flex-col items-center">
+        <div className="flex gap-4 mb-4">
+          <button
+            onClick={() => changePage(-1)}
+            className="btn-soft"
+            disabled={currentPage <= 1}
+          >
+            Previous Page
+          </button>
+          <span className="flex items-center">
+            Page {currentPage} of {pdfDoc?.numPages || '-'}
+          </span>
+          <button
+            onClick={() => changePage(1)}
+            className="btn-soft"
+            // disabled={pdfDoc && currentPage >= pdfDoc.numPages}
+          >
+            Next Page
+          </button>
+          <button onClick={() => handleZoom(1.1)} className="btn-soft">
+            Zoom In
+          </button>
+          <button onClick={() => handleZoom(0.9)} className="btn-soft">
+            Zoom Out
+          </button>
+        </div>
+        <div className="overflow-auto">
+          <canvas ref={canvasRef} className="shadow-lg" />
+        </div>
       </div>
     </div>
   );

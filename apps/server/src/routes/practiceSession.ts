@@ -1,88 +1,119 @@
-// import { Hono } from "hono";
-// import { db } from "../db";
-// import { practiceSessions as practiceSessionsTable } from "../db/schema";
-// import { eq } from "drizzle-orm";
-// import { z } from "zod";
+import { Hono } from "hono";
+import { practiceSessions as practiceSessionTable } from "@/db/schema";
+import { createDb } from "@/db";
+import { eq, and } from "drizzle-orm";
+import { requireAuth } from "@/lib/auth";
+import type { CustomBindings } from "@/types";
 
-// const practiceSessionsRouter = new Hono();
+const practiceSessionRouter = new Hono<CustomBindings>();
 
-// const createPracticeSessionSchema = z.object({
-//   duration: z.number().positive(),
-//   notes: z.string().optional(),
-//   pieceId: z.string(),
-// });
+practiceSessionRouter.get("/api/practiceSession", requireAuth(), async (c) => {
+  try {
+    const auth = c.get("auth");
+    const db = createDb(c.env.DB);
+    const sessions = await db
+      .select()
+      .from(practiceSessionTable)
+      .where(eq(practiceSessionTable.userId, auth.userId))
+      .all();
+    return c.json(sessions);
+  } catch (error) {
+    console.error("Error fetching practice sessions:", error);
+    return c.json({ error: "Failed to fetch practice sessions" }, 500);
+  }
+});
 
-// practiceSessionsRouter.get("/", async (c) => {
-//   const userSessions = await db.query.practiceSessions.findMany({
-//     orderBy: (sessions, { desc }) => [desc(sessions.createdAt)],
-//   });
-//   return c.json({ sessions: userSessions });
-// });
+practiceSessionRouter.get("/api/practiceSession/piece/:id", requireAuth(), async (c) => {
+  try {
+    const pieceId = c.req.param("id");
+    const auth = c.get("auth");
+    const db = createDb(c.env.DB);
+    const sessions = await db
+      .select()
+      .from(practiceSessionTable)
+      .where(and(eq(practiceSessionTable.pieceId, pieceId), eq(practiceSessionTable.userId, auth.userId)))
+      .all();
+    return c.json(sessions);
+  } catch (error) {
+    console.error("Error fetching practice sessions:", error);
+    return c.json({ error: "Failed to fetch practice sessions" }, 500);
+  }
+});
 
-// practiceSessionsRouter.get("/piece/:pieceId", async (c) => {
-//   const pieceId = c.req.param("pieceId");
-//   const pieceSessions = await db.query.practiceSessions.findMany({
-//     where: eq(practiceSessionsTable.pieceId, pieceId),
-//     orderBy: (sessions, { desc }) => [desc(sessions.createdAt)],
-//   });
-//   return c.json({ sessions: pieceSessions });
-// });
+practiceSessionRouter.get("/api/practiceSession/:id", requireAuth(), async (c) => {
+  try {
+    const id = c.req.param("id");
+    const auth = c.get("auth");
+    const db = createDb(c.env.DB);
+    const session = await db.select().from(practiceSessionTable).where(eq(practiceSessionTable.id, id)).get();
 
-// practiceSessionsRouter.get("/:id", async (c) => {
-//   const sessionId = c.req.param("id");
-//   const session = await db.query.practiceSessions.findFirst({
-//     where: eq(practiceSessionsTable.id, sessionId),
-//   });
+    if (!session) {
+      return c.json({ error: "Practice session not found" }, 404);
+    }
 
-//   if (!session) {
-//     return c.json({ error: "Practice session not found" }, 404);
-//   }
-//   return c.json({ session });
-// });
+    if (session.userId !== auth.userId) {
+      return c.json({ error: "Unauthorized" }, 403);
+    }
 
-// practiceSessionsRouter.post("/", async (c) => {
-//   const body = await c.req.json();
-//   const result = createPracticeSessionSchema.safeParse(body);
+    return c.json(session);
+  } catch (error) {
+    console.error("Error fetching practice session:", error);
+    return c.json({ error: "Failed to fetch practice session" }, 500);
+  }
+});
 
-//   if (!result.success) {
-//     return c.json({ error: "Invalid input" }, 400);
-//   }
+practiceSessionRouter.post("/api/practiceSession", requireAuth(), async (c) => {
+  try {
+    const auth = c.get("auth");
+    const data = await c.req.json();
+    const { duration, notes, pieceId } = data;
 
-//   try {
-//     const newSession = await db
-//       .insert(practiceSessionsTable)
-//       .values({
-//         duration: result.data.duration,
-//         notes: result.data.notes,
-//         pieceId: result.data.pieceId,
-//         userId: "temp-user",
-//       })
-//       .returning();
+    if (!duration || !pieceId) {
+      return c.json({ error: "Duration and pieceId are required" }, 400);
+    }
 
-//     return c.json({ session: newSession[0] }, 201);
-//   } catch (error) {
-//     console.error("Error creating practice session:", error);
-//     return c.json({ error: "Failed to create practice session" }, 500);
-//   }
-// });
+    const db = createDb(c.env.DB);
+    const session = await db
+      .insert(practiceSessionTable)
+      .values({
+        duration,
+        notes: notes || null,
+        pieceId,
+        userId: auth.userId,
+      })
+      .returning()
+      .get();
 
-// practiceSessionsRouter.delete("/:id", async (c) => {
-//   const sessionId = c.req.param("id");
-//   const session = await db.query.practiceSessions.findFirst({
-//     where: eq(practiceSessionsTable.id, sessionId),
-//   });
+    return c.json(session, 201);
+  } catch (error) {
+    console.error("Error creating practice session:", error);
+    return c.json({ error: "Failed to create practice session" }, 500);
+  }
+});
 
-//   if (!session) {
-//     return c.json({ error: "Practice session not found" }, 404);
-//   }
+practiceSessionRouter.delete("/api/practiceSession/:id", requireAuth(), async (c) => {
+  try {
+    const auth = c.get("auth");
+    const id = c.req.param("id");
+    const db = createDb(c.env.DB);
 
-//   try {
-//     await db.delete(practiceSessionsTable).where(eq(practiceSessionsTable.id, sessionId));
-//     return c.json({ success: true }, 200);
-//   } catch (error) {
-//     console.error("Error deleting practice session:", error);
-//     return c.json({ error: "Failed to delete practice session" }, 500);
-//   }
-// });
+    const session = await db.select().from(practiceSessionTable).where(eq(practiceSessionTable.id, id)).get();
 
-// export default practiceSessionsRouter;
+    if (!session) {
+      return c.json({ error: "Practice session not found" }, 404);
+    }
+
+    if (session.userId !== auth.userId) {
+      return c.json({ error: "Unauthorized" }, 403);
+    }
+
+    await db.delete(practiceSessionTable).where(eq(practiceSessionTable.id, id)).run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting practice session:", error);
+    return c.json({ error: "Failed to delete practice session" }, 500);
+  }
+});
+
+export default practiceSessionRouter;
