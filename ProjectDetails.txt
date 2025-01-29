@@ -1,0 +1,160 @@
+#Project Details/Goals
+
+# Music Practice Analytics Platform
+
+## Overview
+A modern web application for musicians to track practice sessions, manage sheet music, and record their practice. Built with performance and simplicity in mind.
+
+## Tech Stack
+
+### Frontend
+- React + TypeScript
+- Vite for build tooling
+- TanStack Router for routing
+- TanStack Query for data fetching/caching
+- Zustand for State Management
+- UnoCSS for styling
+- React PDF viewer for sheet music display
+- Web Audio API for recording
+
+### Backend
+- Cloudflare Workers runtime
+- Hono for web framework
+- Drizzle ORM for database operations
+- Serverless D1 database
+- Cloudflare R2 storage
+
+### Infrastructure
+- Cloudflare Workers + Pages for deployment
+- Zod for type validation
+- Clerk for Authentication
+
+## Core Features (MVP)
+
+### Piece Management
+- Upload and store PDF sheet music
+- Basic PDF viewer integration
+- List and organize pieces
+- Simple metadata management
+
+### Practice Session Tracking
+- Basic timer functionality
+- Log practice sessions with duration
+- Add notes to sessions
+- View practice history
+
+### Recording System
+- Record practice audio
+- Basic playback functionality
+- Link recordings to specific pieces
+- Simple notes for recordings
+
+## Future Enhancements (Post-MVP)
+
+### Enhanced PDF Features
+- Sheet music annotations
+- Bookmarking
+- Page marking
+- Zoom controls
+
+### Advanced Practice Tools
+- Metronome
+- Practice goals
+- Tuner
+- Progress tracking
+
+### Spotify Integration
+- Link reference recordings
+- Playback integration
+- Track information
+
+### Basic PWA Features
+- Offline piece viewing
+- Simple offline practice logging
+- Basic data syncing
+
+### Analytics
+- Practice time visualization
+- Progress tracking
+- Pattern analysis
+
+## Route Goals
+Domain: localhost:8787
+
+GET /health: Health Check
+
+Protected routes:
+
+GET /api/pieces - all pieces for user
+GET /api/pieces/:id - specfic piece for user
+GET /api/pieces/:id/pdf - get pdf of piece
+POST /api/pieces - requires title and pdf file
+DEL /api/pieces/:id - delete piece
+
+GET /api/practiceSession/piece/:id - get all practice session for a piece
+GET /api/practiceSession - get all practice sessions for user
+GET /api/practiceSession/:id - get specific practice session
+DEL /api/practiceSession/:id - delete practiceSession
+
+GET /api/recording/piece/:id - get all recordings for a piece
+GET /api/recording - get all recordings
+GET /api/recording/:id - get specific piece
+DEL /api/recording/:id - delete recording
+
+##Zod Validation/Types
+import { z } from "zod";
+
+export const PieceSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, "Title is required"),
+  artist: z.string().optional().nullable(),
+  objectKey: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const CreatePieceSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  artist: z.string().optional(),
+  file: z.instanceof(File),
+});
+
+export const PracticeSessionSchema = z.object({
+  id: z.string(),
+  duration: z.number().positive("Duration must be positive"),
+  notes: z.string().optional().nullable(),
+  pieceId: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+});
+
+export const CreatePracticeSessionSchema = z.object({
+  duration: z.number().positive("Duration must be positive"),
+  notes: z.string().optional(),
+  pieceId: z.string(),
+});
+
+export const RecordingSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, "Title is required"),
+  objectKey: z.string(),
+  notes: z.string().optional().nullable(),
+  pieceId: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+});
+
+export const CreateRecordingSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  notes: z.string().optional(),
+  pieceId: z.string(),
+  file: z.instanceof(File),
+});
+
+export type Piece = z.infer<typeof PieceSchema>;
+export type CreatePiece = z.infer<typeof CreatePieceSchema>;
+export type PracticeSession = z.infer<typeof PracticeSessionSchema>;
+export type CreatePracticeSession = z.infer<typeof CreatePracticeSessionSchema>;
+export type Recording = z.infer<typeof RecordingSchema>;
+export type CreateRecording = z.infer<typeof CreateRecordingSchema>;
