@@ -1,94 +1,53 @@
-// Crescendo Piano Platform - Windsurf/Cursor Rules
-// This file provides specific guidance to the AI assistant about the codebase structure, conventions, and best practices.
+// Crescendo Piano Platform - AI Assistant Guidelines
 
 // Project Overview
-Crescendo is an AI-powered piano practice assistant that helps pianists structure and enhance their practice sessions.
-The AI coach is central to the platform, providing personalized guidance, scheduling practice sessions, managing timers,
-and helping users navigate their sheet music. The minimalist design focuses on simplicity while delivering powerful AI assistance.
-
-// Core Features
-- AI Coach: Central conversation interface that guides all user interactions
-- Practice Management: AI-driven scheduling, smart timers, and simplified logging
-- Sheet Music: Basic PDF viewing with AI-guided navigation
-- User Experience: Guided onboarding and focused mobile-first UI
+// Crescendo: AI-powered piano practice assistant.
+// Core: AI coach for personalized guidance, practice management, sheet music viewing.
+// Goal: Minimalist, mobile-first UI focusing on the AI interaction.
 
 // Technology Stack
-Frontend: SvelteKit with TypeScript
-Styling: Tailwind CSS with Shadcn-ui components and Lucide icons
-Backend & Database: Convex (provides Database, Server Functions, Auth, Storage, Realtime features)
-AI Coaching: Google Gemini 1.5 Flash API (called from Convex server functions)
-PDF Handling: PDF.js for viewing uploaded sheet music
-Package Manager: bun
+// Frontend: SvelteKit (TypeScript)
+// Styling: Tailwind CSS, Shadcn-ui (Svelte port), Lucide Icons
+// Backend/DB: Convex (Database, Functions, Auth, Storage, Realtime)
+// AI: Google Gemini API (via Convex functions)
+// PDF: PDF.js
+// Package Manager: bun
 
-// Project Structure
-The project follows standard SvelteKit structure:
-- src/routes - Contains all page components and layouts
-- src/lib - Shared components, utilities, and stores
-- convex/ - Convex functions, schema, and deployment configuration
-- static/ - Static assets
-- convex/_generated/ - Auto-generated Convex API bindings (don't modify directly)
+// Key Architectural Patterns
+// - SvelteKit routing: +page.svelte (UI), +page.server.ts (server logic).
+// - State: Svelte stores for client-side, Convex as the source of truth.
+// - Data Fetching: Convex queries/mutations via ConvexClient.
+// - Authentication: Convex Auth.
+// - File Storage: Convex Storage for PDFs.
 
-// Architectural Patterns
-- SvelteKit routes use +page.svelte for UI and +page.server.ts for server-side logic
-- API calls use Convex functions through the ConvexClient
-- Authentication is handled by Convex Auth
-- Svelte stores are used for client-side state management
-- Component props use TypeScript interfaces for type safety
+// Code Style & Conventions
+// - Naming: PascalCase (Components), camelCase (functions/variables), kebab-case.svelte (files).
+// - Exports: Use named exports.
+// - Async: Prefer async/await.
+// - Types: Use TypeScript interfaces (props, data structures).
+// - Indentation: Tabs (JS/TS).
+// - Tailwind: Use utility classes directly. Create custom CSS sparingly.
+// - Shadcn-ui (Svelte):
+//    - Use the `cn()` utility for merging classes (`clsx`, `tailwind-merge`).
+//    - Import components from `$lib/components/ui/...`.
+//    - Customize styles via CSS variables when possible.
+//    - Leverage composition and slots.
+//    - Ensure accessibility attributes are maintained/used.
 
-// Code Style Conventions
-- Use named exports for components and functions
-- Prefer async/await over promise chains
-- Use TypeScript interfaces over types where appropriate
-- Follow the existing indentation pattern (tabs for JS/TS files)
-- Component names use PascalCase
-- Function and variable names use camelCase
-- CSS classes use kebab-case when custom classes are needed (prefer Tailwind utility classes)
-- File names use kebab-case.svelte for components
+// Convex Integration
+// - Location: All Convex code in `convex/`. Schema in `convex/schema.ts`.
+// - Functions: Use `query` vs `mutation` appropriately.
+// - API Keys: Manage via environment variables (`.env.local`), access in Convex functions. Never hardcode secrets.
+// - Generated API: `convex/_generated/api.js` (do not edit manually).
 
-// Convex Integration Best Practices
-- All Convex functions should be in the convex/ directory
-- Schema definitions should be in convex/schema.ts
-- Use proper Convex query vs. mutation functions
-- The Convex URL is available via the PUBLIC_CONVEX_URL environment variable
-- Implement proper health checks for Convex using ConvexClient and api._system.tables.list
-- Generated Convex API is located at convex/_generated/api.js
+// AI Feature Focus
+// - AI Coach: Central conversational UI.
+// - Practice Logs: Structure with date, duration, focus (AI-driven).
+// - Sheet Music: PDF viewing via Convex Storage, AI-assisted navigation.
+// - Timers: Integrate AI suggestions with practice timers.
 
-// Component Patterns
-- UI components should be placed in src/lib/components
-- Components should be properly typed with TypeScript interfaces
-- Use Svelte $: reactive declarations for derived state
-- Prefer Svelte stores for shared state
-
-// Data Flow
-- Convex is the source of truth for all data
-- Use Convex real-time subscriptions for live updates
-- All user data is stored in Convex tables defined in the schema
-- File uploads (PDFs) are stored in Convex Storage
-
-// API Integration
-- Google Gemini API calls are made from Convex functions for security
-- Keep API keys and secrets in environment variables, never hardcode them
-- Implement proper error handling for all API calls
-
-// Authentication
-- User authentication is handled by Convex Auth
-- Protect routes and data access with proper authentication checks
-- Store user preferences and settings in the user's record
-
-// Performance Considerations
-- Optimize PDF rendering to prevent memory issues
-- Use proper pagination for lists of practice logs or sheet music
-- Implement lazy loading for components and routes where appropriate
-- Prefer server-side rendering for SEO and initial load performance
-
-// Testing Guidelines
-- Component tests should focus on user interactions
-- API tests should validate data flow and error handling
-- Use appropriate mocking strategies for Convex and external APIs
-
-// AI-Centric Feature Guidance
-- AI Coach Interface: Conversational UI as the primary interaction method
-- Practice Management: Structure logs with date, duration, focus areas, automated by AI
-- Sheet Music: Handle PDF uploads via Convex Storage with AI-assisted navigation
-- Timer Integration: AI-controlled practice timers with focus suggestions
-- User Onboarding: AI-guided setup process to personalize the experience
+// General Guidance
+// - Follow existing patterns in the codebase.
+// - Prioritize clarity, maintainability, and type safety.
+// - Keep API keys secure.
+// - Ensure Convex functions handle errors gracefully.
