@@ -1,0 +1,142 @@
+# Overview
+
+Crescendo is a mobile-first iOS app enabling music teachers and advanced students to annotate digital sheet music, record and attach practice audio/video clips, and exchange feedback seamlessly. The app addresses the lack of efficient, interactive tools for private music educators and their students to collaborate on musical scores, making feedback more contextual, actionable, and engaging. Its value lies in streamlining the teaching process, improving practice outcomes, and supporting rich, media-enhanced communication within a focused musical community.
+
+# Core Features
+
+**Sheet Music Import**
+- **What:** Import PDF, image, or MusicXML files into the app.
+- **Why:** Allows users to work directly with the scores they use in lessons and practice.
+- **How:** Users select files from device storage or cloud sources; imported scores are rendered for annotation.
+
+**Annotation Tools**
+- **What:** Draw, highlight, and add sticky notes directly on the score.
+- **Why:** Enables precise, visual feedback and practice notes, tailored to specific measures or passages.
+- **How:** Touch/stylus interface overlays annotations; sticky notes are linked to locations on the score.
+
+**Media Attachments**
+- **What:** Record or upload audio/video clips and attach them to specific measures.
+- **Why:** Lets teachers demonstrate techniques or students submit practice for targeted feedback.
+- **How:** AVFoundation powers in-app recording; files are linked to score positions and stored in cloud storage.
+
+**Score Sharing**
+- **What:** Share annotated scores with individuals or groups.
+- **Why:** Facilitates feedback loops between teachers and students, and among peers.
+- **How:** Secure links or direct sharing within the app, with permission controls.
+
+**Feedback Exchange**
+- **What:** Recipients can add comments or reply with their own annotations/media.
+- **Why:** Supports ongoing, threaded discussions about specific musical passages.
+- **How:** Comments and additional media are attached contextually to the score or measure.
+
+**User Authentication**
+- **What:** Secure login/signup via Apple ID or OAuth.
+- **Why:** Protects user data and enables personalized experiences.
+- **How:** Auth handled via backend and Cloudflare KV/session management.
+
+**Cloud Sync & Storage**
+- **What:** All data (scores, annotations, media) is synced and backed up in the cloud.
+- **Why:** Ensures access across devices and prevents data loss.
+- **How:** Backend APIs manage sync; Cloudflare R2/D1/KV handle storage and metadata.
+
+# User Experience
+
+**User Personas**
+- **Private Music Teacher:** Needs to give precise, contextual feedback and monitor student progress efficiently.
+- **Advanced Student:** Wants to receive detailed feedback, track practice, and communicate with teachers.
+- **Music School Admin:** Oversees multiple teachers/students, values streamlined workflows and data security.
+
+**Key User Flows**
+- Teacher imports a score, annotates and records feedback, shares with student.
+- Student reviews annotations, records practice, attaches media, and sends back for review.
+- Both can view threaded feedback and historical annotations for each score.
+
+**UI/UX Considerations**
+- Mobile-first, touch-optimized interface.
+- Clear visual cues for annotated measures and attached media.
+- Fast, intuitive media recording and playback.
+- Simple sharing and permission management.
+- Offline support with background sync.
+
+# Technical Architecture
+
+**System Components**
+- **iOS App (Swift/SwiftUI):** UI, annotation tools, media capture, local caching.
+- **Rust Backend (Cloudflare Workers):** API logic, authentication, data orchestration.
+- **Cloudflare D1:** Relational storage for users, scores, annotations metadata.
+- **Cloudflare R2:** Object storage for PDFs, images, audio/video files.
+- **Cloudflare KV:** Fast-access key-value store for sessions, share links, real-time sync.
+
+**Data Models**
+- **User:** id, name, email, auth info, role (teacher/student)
+- **Score:** id, owner, file reference (R2), metadata
+- **Annotation:** id, score_id, user_id, type (draw, note), position, content
+- **MediaAttachment:** id, score_id, measure_ref, user_id, file reference (R2), type (audio/video)
+- **Share:** id, score_id, from_user, to_user/group, permissions
+
+**APIs and Integrations**
+- RESTful APIs for login, import/export, annotation sync, media upload, sharing.
+- Integration with Apple Sign In/OAuth.
+- Cloudflare Workers bindings for D1, R2, KV.
+
+**Infrastructure Requirements**
+- Cloudflare Workers for serverless compute (Rust/WASM).
+- Cloudflare D1 for transactional data.
+- Cloudflare R2 for scalable file storage.
+- Cloudflare KV for fast, ephemeral data.
+- CI/CD pipeline for automated deployment.
+
+# Development Roadmap
+
+**MVP Requirements**
+- User authentication (Apple ID/OAuth)
+- Sheet music import (PDF, image, MusicXML)
+- Basic score rendering
+- Drawing/highlighting/sticky note annotations
+- Audio/video capture and attachment
+- Cloud sync of scores, annotations, and media
+- Score sharing (direct, link-based)
+- Basic feedback/comments on shared scores
+
+**Future Enhancements**
+- Real-time collaborative editing
+- Advanced search/filter for annotations and media
+- In-app notifications
+- Web/Android clients
+- Analytics/dashboard for teachers/schools
+- Public sharing/marketplace for annotated scores
+
+# Logical Dependency Chain
+
+1. **Authentication & User Model:** Foundation for all personalized features.
+2. **Score Import & Rendering:** Core for any annotation or feedback.
+3. **Annotation Tools:** Enables core value proposition.
+4. **Media Capture/Attachment:** Builds on annotation and score structure.
+5. **Cloud Sync & Storage:** Ensures persistence and cross-device access.
+6. **Score Sharing:** Unlocks collaboration and feedback.
+7. **Feedback Exchange:** Enhances shared score interaction.
+
+- Prioritize authentication, score import, and annotation to get a usable prototype quickly.
+- Media and sharing features can be layered in as soon as annotation is stable.
+- Each feature is atomic and can be expanded (e.g., richer annotation types, better sharing controls) as development progresses.
+
+# Risks and Mitigations
+
+- **Music Notation Rendering Complexity:** Use proven libraries and focus on core formats (PDF, MusicXML) for MVP.
+- **Media Storage/Performance:** Leverage Cloudflare R2 for scalable, fast file delivery; optimize media encoding.
+- **MVP Scope Creep:** Strictly define MVP features, defer collaborative and analytics features.
+- **Resource Constraints:** Modularize backend and frontend; use serverless infrastructure to minimize ops overhead.
+- **User Adoption:** Pilot with small, engaged music teaching groups[1], iterate based on feedback.
+
+# Appendix
+
+**Research Findings**
+- Music educators value contextual, media-rich feedback.
+- Existing tools are either too general or lack robust annotation/media features for music.
+
+**Technical Specifications**
+- iOS 16+ support, Swift 6/SwiftUI.
+- Rust 1.75+ backend, compiled to wasm32_unknown-unknown for Cloudflare Workers.
+- Cloudflare D1/R2/KV for storage and infrastructure.
+- AVFoundation for media handling.
+- MusicNotationCore (or similar) for score rendering and annotation.
